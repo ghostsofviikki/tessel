@@ -1,4 +1,4 @@
-// Tessel — Win+Arrow cycling through FancyZones zone combinations.
+// Tessel — zone snapping with Win+Arrow half steps through zone combinations.
 #include "app.h"
 #include "dragsnap.h"
 #include "editor.h"
@@ -74,7 +74,8 @@ static const char* kDefaultIni =
     "overlay_alpha=90\r\n"
     "; Apps to ignore, ';'-separated, matched as part of the exe name (e.g. notepad;game.exe)\r\n"
     "excluded=\r\n"
-    "; Folder with FancyZones' applied-layouts.json / custom-layouts.json. Empty = PowerToys default.\r\n"
+    "; Folder with applied-layouts.json / custom-layouts.json (FancyZones format).\r\n"
+    "; Empty = %LOCALAPPDATA%\\Tessel\\layouts. Set it to PowerToys' FancyZones folder to share layouts with FancyZones.\r\n"
     "layouts_dir=\r\n"
     "; Opens the layout editor on the monitor under the mouse. Modifiers win/ctrl/alt/shift + a key (letter, digit, `, f1-f12).\r\n"
     "editor_hotkey=win+shift+z\r\n";
@@ -124,7 +125,7 @@ static void LoadConfig() {
     while (std::getline(ex, item, L';'))
         if (!Trim(item).empty()) c.excluded.push_back(Trim(item));
     c.layoutsDir = Trim(IniStr(L"layouts_dir", L""));
-    if (c.layoutsDir.empty()) c.layoutsDir = FancyZonesDir();
+    if (c.layoutsDir.empty()) c.layoutsDir = TesselLayoutsDir();
     c.editorHotkey = Lower(Trim(IniStr(L"editor_hotkey", L"win+shift+z")));
     c.reflow = GetPrivateProfileIntW(L"tessel", L"reflow_windows", 1, g_iniPath.c_str()) != 0;
     c.snapNew = GetPrivateProfileIntW(L"tessel", L"snap_new_windows", 1, g_iniPath.c_str()) != 0;
@@ -276,7 +277,7 @@ void OpenEditorFor(size_t mi, bool fresh) {
     req.color = g_cfg.overlayColor;
     const CustomLayout* cur = fresh ? nullptr : AppliedCustom(m);
     if (cur && !cur->isGrid) {
-        MessageBoxW(nullptr, L"This monitor uses a canvas layout, which Tessel can't edit.\nUse the FancyZones editor, or pick a grid layout or template in Tessel settings.",
+        MessageBoxW(nullptr, L"This monitor uses a free-form (canvas) layout, which Tessel can't edit.\nPick a grid layout or a template in Tessel settings instead.",
                     L"Tessel", MB_ICONINFORMATION);
         return;
     }

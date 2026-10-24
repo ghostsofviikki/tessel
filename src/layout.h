@@ -1,4 +1,4 @@
-// FancyZones config reading, monitor matching and zone rect math.
+// Layout files (FancyZones format) reading, monitor matching and zone rect math.
 #pragma once
 #include "combos.h"
 #include <string>
@@ -49,6 +49,8 @@ struct MonCtx {
 };
 
 std::wstring FancyZonesDir();
+// %LOCALAPPDATA%\Tessel\layouts. Created on first use, seeded with any existing FancyZones layouts.
+std::wstring TesselLayoutsDir();
 bool LoadLayoutDB(const std::wstring& dir, LayoutDB& db, std::string& err);
 std::string CurrentVirtualDesktop();
 // Enumerates monitors and resolves each one's zones for the given virtual desktop.

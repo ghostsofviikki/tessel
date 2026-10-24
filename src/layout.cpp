@@ -13,6 +13,22 @@ std::wstring FancyZonesDir() {
     return dir;
 }
 
+std::wstring TesselLayoutsDir() {
+    wchar_t* p = nullptr;
+    std::wstring dir;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &p))) dir = std::wstring(p) + L"\\Tessel\\layouts";
+    CoTaskMemFree(p);
+    if (dir.empty() || GetFileAttributesW(dir.c_str()) != INVALID_FILE_ATTRIBUTES) return dir;
+    // First run: start from the user's FancyZones layouts, if there are any. Only once, so a later
+    // FancyZones change or a deleted layout never comes back on its own.
+    CreateDirectoryW(dir.substr(0, dir.find_last_of(L'\\')).c_str(), nullptr);
+    CreateDirectoryW(dir.c_str(), nullptr);
+    std::wstring fz = FancyZonesDir();
+    for (const wchar_t* f : { L"\\custom-layouts.json", L"\\applied-layouts.json" })
+        CopyFileW((fz + f).c_str(), (dir + f).c_str(), TRUE);
+    return dir;
+}
+
 static bool ReadFile(const std::wstring& path, std::string& out) {
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
@@ -276,7 +292,7 @@ std::vector<MonCtx> BuildMonitors(const LayoutDB& db, const std::string& vd, int
     EnumDisplayMonitors(nullptr, nullptr, EnumProc, (LPARAM)&list);
     for (auto& m : list) {
         const AppliedLayout* a = FindApplied(db, m, vd);
-        if (!a) { m.status = "no FancyZones layout applied to this monitor"; continue; }
+        if (!a) { m.status = "no layout applied to this monitor"; continue; }
         int spacing = a->showSpacing ? a->spacing : 0;
         m.uuid = a->uuid;
         m.type = a->type;

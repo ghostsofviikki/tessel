@@ -1,4 +1,4 @@
-// Writes layouts back to FancyZones' own files, so its editor and Tessel stay in sync.
+// Writes layout files in the FancyZones format, so they stay interchangeable with FancyZones.
 #pragma once
 #include "layout.h"
 

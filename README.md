@@ -1,6 +1,12 @@
 # Tessel
 
-A small tray app that makes **Win+Arrow** move a window through FancyZones zone *combinations* (single zones, pairs, and 2x2 blocks), not just one zone at a time. It reads your existing FancyZones layouts and doesn't need PowerToys running. See [PLAN.md](PLAN.md) for the design.
+A small tray app for zone snapping on Windows. **Win+Arrow** moves a window through zone *combinations* (single zones, pairs, and 2x2 blocks), not just one zone at a time, and drag + right-click snaps with the mouse. It started as a lighter replacement for PowerToys FancyZones, uses the same layout file format, and doesn't need PowerToys installed. See [PLAN.md](PLAN.md) for the original design.
+
+## Layouts folder
+
+Layouts are stored in `%LOCALAPPDATA%\Tessel\layouts` (`custom-layouts.json`, `applied-layouts.json`).
+- **First run:** Tessel copies in any existing FancyZones layouts, once. After that it never touches PowerToys' folder, so you can uninstall PowerToys.
+- **Sharing with FancyZones:** set `layouts_dir` in `tessel.ini` to `%LOCALAPPDATA%\Microsoft\PowerToys\FancyZones` to keep using the same files as FancyZones.
 
 ## Keys
 
@@ -37,7 +43,7 @@ Press **Win+Shift+Z**, or click **Edit layout & gap** in Settings. This opens a 
 
 Each zone shows its size in pixels and percent while you edit.
 
-**Windows follow the layout.** When a layout changes (from this editor, the Settings gallery, the FancyZones editor, or a work-area change such as a taskbar resize), windows that were in a zone or combination move into the matching zones of the new layout:
+**Windows follow the layout.** When a layout changes (from this editor, the Settings gallery, an edit to the layout files, or a work-area change such as a taskbar resize), windows that were in a zone or combination move into the matching zones of the new layout:
 - If only sizes or the gap changed, each window keeps the same zones.
 - If rows or columns were added or removed, each window goes to the zones closest to where it was.
 
@@ -85,9 +91,7 @@ Left-click the tray icon, or right-click it and choose **Settings**. The tray me
 
 The window follows the Windows light/dark theme. The tray icon is black on a light taskbar and white on a dark one.
 
-Changes are saved to FancyZones' own `custom-layouts.json` / `applied-layouts.json`, so the FancyZones editor sees them too. The first save keeps the original files as `*.tessel-backup` in the same folder. If a layout is used on several monitors, changing its gap changes it on all of them, as in FancyZones. Adding or removing a row or column turns merged cells back into a plain grid. Canvas layouts can be switched to, but only grid layouts can be edited here.
-
-While PowerToys is running, FancyZones may not pick up the change until it restarts, and it can overwrite the files with its own copy. Quit PowerToys before editing.
+Changes are saved to the layout files in the layouts folder (above). The first save keeps the original files as `*.tessel-backup` in the same folder. If a layout is used on several monitors, changing its gap changes it on all of them. Adding or removing a row or column turns merged cells back into a plain grid. Free-form (canvas) layouts imported from FancyZones can be switched to, but only grid layouts can be edited here.
 
 ## Build
 
@@ -99,9 +103,9 @@ build.cmd
 
 ## Use
 
-1. **Stop FancyZones from handling Win+Arrow.** In PowerToys → FancyZones, turn off *Override Windows Snap*, or quit PowerToys. While FancyZones is running, whichever program installed its keyboard hook last receives Win+Arrow first.
+1. **If PowerToys is installed, don't run FancyZones alongside Tessel.** Turn FancyZones off in PowerToys, or uninstall PowerToys. Both handle Win+Arrow and window drags, and whichever started last gets the keys first.
 2. Run `bin\tessel.exe`. Click its tray icon to open Settings.
-3. To edit layouts, use the built-in editor (below) or the FancyZones editor. Tessel reloads automatically when the layout files change.
+3. To edit layouts, use the built-in editor (below). Tessel also reloads automatically when the layout files change on disk.
 
 Settings are in `bin\tessel.ini`, which is created on first run and reloaded when saved. They cover edge behavior, the largest combination size (`max_span`), the Win+Alt jump, the overlay, and excluded apps.
 
