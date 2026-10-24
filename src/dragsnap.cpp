@@ -11,6 +11,7 @@ HINSTANCE s_inst;
 std::function<void(HWND, const MonCtx&, int)> s_onSnap;
 HWND s_drag;          // window being dragged
 SIZE s_startSize;     // a resize changes the size; a move doesn't
+bool s_fromMaximized; // dragging a maximized window restores it (new size) but is always a move
 bool s_zones;         // right button toggled the zones on
 HHOOK s_mouse;
 HWND s_overlay;
@@ -28,6 +29,7 @@ void Fill(HDC dc, const RECT& r, COLORREF c) {
 }
 
 bool Moving() {
+    if (s_fromMaximized) return true;  // maximized windows can't be resized by dragging
     RECT r;
     return GetWindowRect(s_drag, &r) && r.right - r.left == s_startSize.cx && r.bottom - r.top == s_startSize.cy;
 }
@@ -150,6 +152,7 @@ void DragSnapStart(HWND w) {
     GetWindowRect(w, &r);
     s_drag = w;
     s_startSize = SIZE{ r.right - r.left, r.bottom - r.top };
+    s_fromMaximized = IsZoomed(w) != FALSE;
     s_mouse = SetWindowsHookExW(WH_MOUSE_LL, MouseProc, s_inst, 0);  // only while a drag is in progress
 }
 
