@@ -1,0 +1,2 @@
+# Build output, plus the personal tessel.ini and dumps that live next to the exe
+bin/
